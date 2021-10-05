@@ -1,0 +1,268 @@
+{
+    "zabbix_export": {
+        "version": "5.4",
+        "date": "2021-10-05T19:14:52Z",
+        "groups": [
+            {
+                "uuid": "7df96b18c230490a9a0a9e2307226338",
+                "name": "Templates"
+            },
+            {
+                "uuid": "9a1895ed9c4740469b84deb3263a7671",
+                "name": "Templates/Cloud_Monitoring"
+            }
+        ],
+        "templates": [
+            {
+                "uuid": "2c26e90729e54e3fbc3119878a88bea0",
+                "template": "Template Kubernetes",
+                "name": "Template Kubernetes",
+                "description": "Get Kubernetes cluster metrics from the API server. \n\nCheck the Kubernetes documentation for more information\nhttps://kubernetes.io/docs/concepts/overview/kubernetes-api/\n\nMacros :\n{$API_SERVER} => API server url (https://<IP>:<Port>\n{$API_TOKEN} => Token from the service account used to access the API",
+                "groups": [
+                    {
+                        "name": "Templates"
+                    },
+                    {
+                        "name": "Templates/Cloud_Monitoring"
+                    }
+                ],
+                "items": [
+                    {
+                        "uuid": "0dc8bef7b0f2474c867606b5dd472061",
+                        "name": "Kubernetes master node",
+                        "type": "HTTP_AGENT",
+                        "key": "kubernetes.master.node",
+                        "history": "2w",
+                        "trends": "0",
+                        "value_type": "TEXT",
+                        "timeout": "30s",
+                        "url": "{$API_SERVER}/api/v1/nodes",
+                        "headers": [
+                            {
+                                "name": "Authorization",
+                                "value": "Bearer {$API_TOKEN}"
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Kubernetes",
+                                "value": "API"
+                            },
+                            {
+                                "tag": "Service",
+                                "value": "Kubernetes"
+                            }
+                        ]
+                    }
+                ],
+                "discovery_rules": [
+                    {
+                        "uuid": "21cf328d34e84f35ad0dcf1406323c6b",
+                        "name": "Nodes discovery",
+                        "type": "DEPENDENT",
+                        "key": "kubernetes.nodes.discovery",
+                        "delay": "0",
+                        "lifetime": "1d",
+                        "item_prototypes": [
+                            {
+                                "uuid": "a370353277b04c7da708012b04c2eab0",
+                                "name": "Node {#NODE_NAME} : DiskPressure",
+                                "type": "DEPENDENT",
+                                "key": "kubernetes.node[{#NODE_NAME},diskPressure]",
+                                "delay": "0",
+                                "history": "2w",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.items[?(@.metadata.name=='{#NODE_NAME}')].status.conditions[?(@.type=='DiskPressure')].status.first()"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "kubernetes.master.node"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Storage"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "Kubernetes"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "e4f961a811524ca1a7ce8321587aedde",
+                                        "expression": "last(/Template Kubernetes/kubernetes.node[{#NODE_NAME},diskPressure],#5)=\"True\"",
+                                        "name": "Node {#NODE_NAME} DiskPressure is True",
+                                        "priority": "HIGH",
+                                        "tags": [
+                                            {
+                                                "tag": "Application",
+                                                "value": "Storage"
+                                            },
+                                            {
+                                                "tag": "Service",
+                                                "value": "Kubernetes"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "c96be1a403284a0d90ecd964bc98daf2",
+                                "name": "Node {#NODE_NAME} : MemoryPressure",
+                                "type": "DEPENDENT",
+                                "key": "kubernetes.node[{#NODE_NAME},memoryPressure]",
+                                "delay": "0",
+                                "history": "2w",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.items[?(@.metadata.name=='{#NODE_NAME}')].status.conditions[?(@.type=='MemoryPressure')].status.first()"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "kubernetes.master.node"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Memory"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "Kubernetes"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "cbf69da42ef442eb9e2c2265130105be",
+                                        "expression": "last(/Template Kubernetes/kubernetes.node[{#NODE_NAME},memoryPressure],#5)=\"True\"",
+                                        "name": "Node {#NODE_NAME} MemoryPressure is True",
+                                        "priority": "HIGH",
+                                        "tags": [
+                                            {
+                                                "tag": "Application",
+                                                "value": "Memory"
+                                            },
+                                            {
+                                                "tag": "Service",
+                                                "value": "Kubernetes"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "9f0ae18daac447be9a8b77df19c7d80c",
+                                "name": "Node name : {#NODE_NAME}",
+                                "type": "DEPENDENT",
+                                "key": "kubernetes.node[{#NODE_NAME},name]",
+                                "delay": "0",
+                                "history": "2w",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.items[?(@.metadata.name=='{#NODE_NAME}')].metadata.name.first()"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "kubernetes.master.node"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "General"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "Kubernetes"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "77d4dbe291c6403f9fe31c53dc92d834",
+                                "name": "Node {#NODE_NAME} : PIDPressure",
+                                "type": "DEPENDENT",
+                                "key": "kubernetes.node[{#NODE_NAME},PIDPressure]",
+                                "delay": "0",
+                                "history": "2w",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.items[?(@.metadata.name=='{#NODE_NAME}')].status.conditions[?(@.type=='PIDPressure')].status.first()"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "kubernetes.master.node"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "System"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "Kubernetes"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "a55af0f6ee474c158de71cfbadf3088f",
+                                        "expression": "last(/Template Kubernetes/kubernetes.node[{#NODE_NAME},PIDPressure],#5)=\"True\"",
+                                        "name": "Node {#NODE_NAME} PIDPressure is True",
+                                        "priority": "HIGH",
+                                        "tags": [
+                                            {
+                                                "tag": "Application",
+                                                "value": "System"
+                                            },
+                                            {
+                                                "tag": "Service",
+                                                "value": "Kubernetes"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "kubernetes.master.node"
+                        },
+                        "lld_macro_paths": [
+                            {
+                                "lld_macro": "{#NODE_NAME}",
+                                "path": "$.name"
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.items[:].metadata"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
