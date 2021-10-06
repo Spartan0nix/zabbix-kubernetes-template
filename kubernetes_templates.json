@@ -1,7 +1,7 @@
 {
     "zabbix_export": {
         "version": "5.4",
-        "date": "2021-10-05T19:14:52Z",
+        "date": "2021-10-06T21:12:26Z",
         "groups": [
             {
                 "uuid": "7df96b18c230490a9a0a9e2307226338",
@@ -37,6 +37,33 @@
                         "value_type": "TEXT",
                         "timeout": "30s",
                         "url": "{$API_SERVER}/api/v1/nodes",
+                        "headers": [
+                            {
+                                "name": "Authorization",
+                                "value": "Bearer {$API_TOKEN}"
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Kubernetes",
+                                "value": "API"
+                            },
+                            {
+                                "tag": "Service",
+                                "value": "Kubernetes"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "9d04dc10676b4124b1098b9562efbb7c",
+                        "name": "Kubernetes master pod",
+                        "type": "HTTP_AGENT",
+                        "key": "kubernetes.master.pod",
+                        "history": "2w",
+                        "trends": "0",
+                        "value_type": "TEXT",
+                        "timeout": "30s",
+                        "url": "{$API_SERVER}/api/v1/pods",
                         "headers": [
                             {
                                 "name": "Authorization",
@@ -99,7 +126,7 @@
                                         "uuid": "e4f961a811524ca1a7ce8321587aedde",
                                         "expression": "last(/Template Kubernetes/kubernetes.node[{#NODE_NAME},diskPressure],#5)=\"True\"",
                                         "name": "Node {#NODE_NAME} DiskPressure is True",
-                                        "priority": "HIGH",
+                                        "priority": "AVERAGE",
                                         "tags": [
                                             {
                                                 "tag": "Application",
@@ -148,7 +175,7 @@
                                         "uuid": "cbf69da42ef442eb9e2c2265130105be",
                                         "expression": "last(/Template Kubernetes/kubernetes.node[{#NODE_NAME},memoryPressure],#5)=\"True\"",
                                         "name": "Node {#NODE_NAME} MemoryPressure is True",
-                                        "priority": "HIGH",
+                                        "priority": "AVERAGE",
                                         "tags": [
                                             {
                                                 "tag": "Application",
@@ -228,6 +255,55 @@
                                         "uuid": "a55af0f6ee474c158de71cfbadf3088f",
                                         "expression": "last(/Template Kubernetes/kubernetes.node[{#NODE_NAME},PIDPressure],#5)=\"True\"",
                                         "name": "Node {#NODE_NAME} PIDPressure is True",
+                                        "priority": "AVERAGE",
+                                        "tags": [
+                                            {
+                                                "tag": "Application",
+                                                "value": "System"
+                                            },
+                                            {
+                                                "tag": "Service",
+                                                "value": "Kubernetes"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "dbc6894d24fd485da54c822f9c981314",
+                                "name": "Node {#NODE_NAME} : Operational Status",
+                                "type": "DEPENDENT",
+                                "key": "kubernetes.node[{#NODE_NAME},ready]",
+                                "delay": "0",
+                                "history": "2w",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.items[?(@.metadata.name=='{#NODE_NAME}')].status.conditions[?(@.type=='Ready')].status.first()"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "kubernetes.master.node"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "System"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "Kubernetes"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "e170651ef74d4e84a681453e94c3e2c3",
+                                        "expression": "last(/Template Kubernetes/kubernetes.node[{#NODE_NAME},ready],#2)=\"False\"",
+                                        "name": "Node {#NODE_NAME} is Down",
                                         "priority": "HIGH",
                                         "tags": [
                                             {
@@ -249,6 +325,95 @@
                         "lld_macro_paths": [
                             {
                                 "lld_macro": "{#NODE_NAME}",
+                                "path": "$.name"
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.items[:].metadata"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "199a7e088d084a9482218d5ba3778a16",
+                        "name": "Pods discovery",
+                        "type": "DEPENDENT",
+                        "key": "Kubernetes.pods.discovery",
+                        "delay": "0",
+                        "lifetime": "1d",
+                        "item_prototypes": [
+                            {
+                                "uuid": "a90c646fa5be47c19838dcf1e543a1e8",
+                                "name": "Pod name :  {#POD_NAME}",
+                                "type": "DEPENDENT",
+                                "key": "kubernetes.pod[{#POD_NAME},name]",
+                                "delay": "0",
+                                "history": "2w",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.items[?(@.metadata.name=='{#POD_NAME}')].metadata.name.first()"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "kubernetes.master.pod"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "General"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "Kubernetes"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "1f8211121ac14ef281a867f05f494335",
+                                "name": "Pod {#POD_NAME} : Volumes list",
+                                "type": "DEPENDENT",
+                                "key": "kubernetes.pod[{#POD_NAME},volumesList]",
+                                "delay": "0",
+                                "history": "2w",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.items[?(@.metadata.name=='{#POD_NAME}')].spec.volumes[:].name"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "kubernetes.master.pod"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "File System"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "Kubernetes"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "kubernetes.master.pod"
+                        },
+                        "lld_macro_paths": [
+                            {
+                                "lld_macro": "{#POD_NAME}",
                                 "path": "$.name"
                             }
                         ],
