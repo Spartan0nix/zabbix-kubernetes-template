@@ -1,7 +1,7 @@
 {
     "zabbix_export": {
         "version": "5.4",
-        "date": "2021-10-06T21:12:26Z",
+        "date": "2021-10-07T19:22:03Z",
         "groups": [
             {
                 "uuid": "7df96b18c230490a9a0a9e2307226338",
@@ -28,6 +28,57 @@
                 ],
                 "items": [
                     {
+                        "uuid": "5832013e95644b339de56a91d5c1e527",
+                        "name": "Kubernetes master endpoint",
+                        "type": "HTTP_AGENT",
+                        "key": "kubernetes.master.endpoint",
+                        "history": "2w",
+                        "trends": "0",
+                        "value_type": "TEXT",
+                        "timeout": "30s",
+                        "url": "{$API_SERVER}/api/v1/endpoints",
+                        "headers": [
+                            {
+                                "name": "Authorization",
+                                "value": "Bearer {$API_TOKEN}"
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
+                                "value": "Kubernetes"
+                            },
+                            {
+                                "tag": "Service",
+                                "value": "API"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "e7d5568cdb3a426a98dcff81beac70d9",
+                                "expression": "nodata(/Template Kubernetes/kubernetes.master.endpoint,5m)=1",
+                                "name": "Cluster endpoints are no longer monitored",
+                                "priority": "AVERAGE",
+                                "dependencies": [
+                                    {
+                                        "name": "Cluster is not reachable",
+                                        "expression": "nodata(/Template Kubernetes/kubernetes.master.node,5m)=1 or nodata(/Template Kubernetes/kubernetes.master.pod,5m)=1 or nodata(/Template Kubernetes/kubernetes.master.endpoint,5m)=1 or nodata(/Template Kubernetes/kubernetes.master.service,5m)=1"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Kubernetes"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "Availablity"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
                         "uuid": "0dc8bef7b0f2474c867606b5dd472061",
                         "name": "Kubernetes master node",
                         "type": "HTTP_AGENT",
@@ -45,12 +96,36 @@
                         ],
                         "tags": [
                             {
-                                "tag": "Kubernetes",
-                                "value": "API"
+                                "tag": "Application",
+                                "value": "Kubernetes"
                             },
                             {
                                 "tag": "Service",
-                                "value": "Kubernetes"
+                                "value": "API"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "d94660f653f84355a9c908d72b727810",
+                                "expression": "nodata(/Template Kubernetes/kubernetes.master.node,5m)=1",
+                                "name": "Cluster nodes are no longer monitored",
+                                "priority": "AVERAGE",
+                                "dependencies": [
+                                    {
+                                        "name": "Cluster is not reachable",
+                                        "expression": "nodata(/Template Kubernetes/kubernetes.master.node,5m)=1 or nodata(/Template Kubernetes/kubernetes.master.pod,5m)=1 or nodata(/Template Kubernetes/kubernetes.master.endpoint,5m)=1 or nodata(/Template Kubernetes/kubernetes.master.service,5m)=1"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Kubernetes"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "Availablity"
+                                    }
+                                ]
                             }
                         ]
                     },
@@ -72,17 +147,154 @@
                         ],
                         "tags": [
                             {
-                                "tag": "Kubernetes",
-                                "value": "API"
+                                "tag": "Application",
+                                "value": "Kubernetes"
                             },
                             {
                                 "tag": "Service",
+                                "value": "API"
+                            }
+                        ]
+                    },
+                    {
+                        "uuid": "3fbdabe60c8d4fd98b205e821d444aee",
+                        "name": "Kubernetes master service",
+                        "type": "HTTP_AGENT",
+                        "key": "kubernetes.master.service",
+                        "history": "2w",
+                        "trends": "0",
+                        "value_type": "TEXT",
+                        "timeout": "30s",
+                        "url": "{$API_SERVER}/api/v1/services",
+                        "headers": [
+                            {
+                                "name": "Authorization",
+                                "value": "Bearer {$API_TOKEN}"
+                            }
+                        ],
+                        "tags": [
+                            {
+                                "tag": "Application",
                                 "value": "Kubernetes"
+                            },
+                            {
+                                "tag": "Service",
+                                "value": "API"
+                            }
+                        ],
+                        "triggers": [
+                            {
+                                "uuid": "5abb0ff004294fa7b148a011a4eb3439",
+                                "expression": "nodata(/Template Kubernetes/kubernetes.master.service,5m)=1",
+                                "name": "Cluster services are no longer monitored",
+                                "priority": "AVERAGE",
+                                "dependencies": [
+                                    {
+                                        "name": "Cluster is not reachable",
+                                        "expression": "nodata(/Template Kubernetes/kubernetes.master.node,5m)=1 or nodata(/Template Kubernetes/kubernetes.master.pod,5m)=1 or nodata(/Template Kubernetes/kubernetes.master.endpoint,5m)=1 or nodata(/Template Kubernetes/kubernetes.master.service,5m)=1"
+                                    }
+                                ],
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Kubernetes"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "Availablity"
+                                    }
+                                ]
                             }
                         ]
                     }
                 ],
                 "discovery_rules": [
+                    {
+                        "uuid": "ddea415080ff4202ad27e4e54397458f",
+                        "name": "Endpoints discovery",
+                        "type": "DEPENDENT",
+                        "key": "kubernetes.endpoints.discovery",
+                        "delay": "0",
+                        "filter": {
+                            "evaltype": "AND",
+                            "conditions": [
+                                {
+                                    "macro": "{#ENDPOINT_NAME}",
+                                    "operator": "EXISTS",
+                                    "formulaid": "B"
+                                },
+                                {
+                                    "macro": "{#ENDPOINT_IP}",
+                                    "operator": "EXISTS",
+                                    "formulaid": "A"
+                                },
+                                {
+                                    "macro": "{#ENDPOINT_PORT}",
+                                    "operator": "EXISTS",
+                                    "formulaid": "C"
+                                }
+                            ]
+                        },
+                        "lifetime": "1d",
+                        "item_prototypes": [
+                            {
+                                "uuid": "578000f26b7641a98e999ce46460e6bd",
+                                "name": "Endpoint {#ENDPOINT_NAME} : {#ENDPOINT_IP}:{#ENDPOINT_PORT}",
+                                "type": "DEPENDENT",
+                                "key": "kubernetes.endpoint[{#ENDPOINT_NAME},details]",
+                                "delay": "0",
+                                "history": "2w",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.items[?(@.metadata.name=='{#ENDPOINT_NAME}')]"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "kubernetes.master.endpoint"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Kubernetes"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "Network"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "kubernetes.master.endpoint"
+                        },
+                        "lld_macro_paths": [
+                            {
+                                "lld_macro": "{#ENDPOINT_NAME}",
+                                "path": "$.metadata.name"
+                            },
+                            {
+                                "lld_macro": "{#ENDPOINT_IP}",
+                                "path": "$.subsets[:].addresses[:].ip"
+                            },
+                            {
+                                "lld_macro": "{#ENDPOINT_PORT}",
+                                "path": "$.subsets[:].ports[:].port"
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.items[:]"
+                                ]
+                            }
+                        ]
+                    },
                     {
                         "uuid": "21cf328d34e84f35ad0dcf1406323c6b",
                         "name": "Nodes discovery",
@@ -114,11 +326,11 @@
                                 "tags": [
                                     {
                                         "tag": "Application",
-                                        "value": "Storage"
+                                        "value": "Kubernetes"
                                     },
                                     {
                                         "tag": "Service",
-                                        "value": "Kubernetes"
+                                        "value": "File System"
                                     }
                                 ],
                                 "trigger_prototypes": [
@@ -163,11 +375,11 @@
                                 "tags": [
                                     {
                                         "tag": "Application",
-                                        "value": "Memory"
+                                        "value": "Kubernetes"
                                     },
                                     {
                                         "tag": "Service",
-                                        "value": "Kubernetes"
+                                        "value": "Memory"
                                     }
                                 ],
                                 "trigger_prototypes": [
@@ -212,11 +424,11 @@
                                 "tags": [
                                     {
                                         "tag": "Application",
-                                        "value": "General"
+                                        "value": "Kubernetes"
                                     },
                                     {
                                         "tag": "Service",
-                                        "value": "Kubernetes"
+                                        "value": "General"
                                     }
                                 ]
                             },
@@ -243,11 +455,11 @@
                                 "tags": [
                                     {
                                         "tag": "Application",
-                                        "value": "System"
+                                        "value": "Kubernetes"
                                     },
                                     {
                                         "tag": "Service",
-                                        "value": "Kubernetes"
+                                        "value": "System"
                                     }
                                 ],
                                 "trigger_prototypes": [
@@ -292,11 +504,11 @@
                                 "tags": [
                                     {
                                         "tag": "Application",
-                                        "value": "System"
+                                        "value": "Kubernetes"
                                     },
                                     {
                                         "tag": "Service",
-                                        "value": "Kubernetes"
+                                        "value": "Availablity"
                                     }
                                 ],
                                 "trigger_prototypes": [
@@ -341,7 +553,7 @@
                         "uuid": "199a7e088d084a9482218d5ba3778a16",
                         "name": "Pods discovery",
                         "type": "DEPENDENT",
-                        "key": "Kubernetes.pods.discovery",
+                        "key": "kubernetes.pods.discovery",
                         "delay": "0",
                         "lifetime": "1d",
                         "item_prototypes": [
@@ -368,11 +580,60 @@
                                 "tags": [
                                     {
                                         "tag": "Application",
-                                        "value": "General"
+                                        "value": "Kubernetes"
                                     },
                                     {
                                         "tag": "Service",
+                                        "value": "General"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "cfa1237aecb54c148273221ef5daca15",
+                                "name": "Pod {#POD_NAME} : Status",
+                                "type": "DEPENDENT",
+                                "key": "kubernetes.pod[{#POD_NAME},status]",
+                                "delay": "0",
+                                "history": "2w",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.items[?(@.metadata.name=='{#POD_NAME}')].status.phase.first()"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "kubernetes.master.pod"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "Application",
                                         "value": "Kubernetes"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "Availability"
+                                    }
+                                ],
+                                "trigger_prototypes": [
+                                    {
+                                        "uuid": "21201c436b06416eb668c76514458825",
+                                        "expression": "last(/Template Kubernetes/kubernetes.pod[{#POD_NAME},status],#5)<>\"Running\"",
+                                        "name": "Pod {#POD_NAME} is not running",
+                                        "priority": "HIGH",
+                                        "tags": [
+                                            {
+                                                "tag": "Application",
+                                                "value": "System"
+                                            },
+                                            {
+                                                "tag": "Service",
+                                                "value": "Kubernetes"
+                                            }
+                                        ]
                                     }
                                 ]
                             },
@@ -399,11 +660,11 @@
                                 "tags": [
                                     {
                                         "tag": "Application",
-                                        "value": "File System"
+                                        "value": "Kubernetes"
                                     },
                                     {
                                         "tag": "Service",
-                                        "value": "Kubernetes"
+                                        "value": "File System"
                                     }
                                 ]
                             }
@@ -425,6 +686,140 @@
                                 ]
                             }
                         ]
+                    },
+                    {
+                        "uuid": "56dccd5e5c4242adb55fabf3dc9f61a9",
+                        "name": "Services discovery",
+                        "type": "DEPENDENT",
+                        "key": "kubernetes.services.discovery",
+                        "delay": "0",
+                        "lifetime": "1d",
+                        "item_prototypes": [
+                            {
+                                "uuid": "221cce739e9545e09680f59a2c80d69a",
+                                "name": "Service {#SERVICE_NAME} : {#SERVICE_IP}:{#SERVICE_PORT}",
+                                "type": "DEPENDENT",
+                                "key": "kubernetes.node[{#NODE_NAME},details]",
+                                "delay": "0",
+                                "history": "2w",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.items[?(@.metadata.name=='{#SERVICE_NAME}')].spec"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "kubernetes.master.service"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Kubernetes"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "System"
+                                    }
+                                ]
+                            },
+                            {
+                                "uuid": "0a107958c6af49089e6bbfb1e4b58818",
+                                "name": "Service {#SERVICE_NAME} : Type",
+                                "type": "DEPENDENT",
+                                "key": "kubernetes.service[{#SERVICE_NAME},type]",
+                                "delay": "0",
+                                "history": "2w",
+                                "trends": "0",
+                                "value_type": "TEXT",
+                                "preprocessing": [
+                                    {
+                                        "type": "JSONPATH",
+                                        "parameters": [
+                                            "$.items[?(@.metadata.name=='{#SERVICE_NAME}')].spec.type.first()"
+                                        ]
+                                    }
+                                ],
+                                "master_item": {
+                                    "key": "kubernetes.master.service"
+                                },
+                                "tags": [
+                                    {
+                                        "tag": "Application",
+                                        "value": "Kubernetes"
+                                    },
+                                    {
+                                        "tag": "Service",
+                                        "value": "General"
+                                    }
+                                ]
+                            }
+                        ],
+                        "master_item": {
+                            "key": "kubernetes.master.service"
+                        },
+                        "lld_macro_paths": [
+                            {
+                                "lld_macro": "{#SERVICE_NAME}",
+                                "path": "$.metadata.name"
+                            },
+                            {
+                                "lld_macro": "{#SERVICE_TYPE}",
+                                "path": "$.spec.type"
+                            },
+                            {
+                                "lld_macro": "{#SERVICE_IP}",
+                                "path": "$.spec.clusterIPs[:]"
+                            },
+                            {
+                                "lld_macro": "{#SERVICE_PORT}",
+                                "path": "$.spec.ports[:].port"
+                            }
+                        ],
+                        "preprocessing": [
+                            {
+                                "type": "JSONPATH",
+                                "parameters": [
+                                    "$.items[:]"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "tags": [
+                    {
+                        "tag": "Application",
+                        "value": "Kubernetes"
+                    }
+                ],
+                "macros": [
+                    {
+                        "macro": "{$API_SERVER}",
+                        "value": "https://127.0.0.1:8443"
+                    },
+                    {
+                        "macro": "{$API_TOKEN}"
+                    }
+                ]
+            }
+        ],
+        "triggers": [
+            {
+                "uuid": "6319e2633088463aba370604cd1ba6c8",
+                "expression": "nodata(/Template Kubernetes/kubernetes.master.node,5m)=1 or nodata(/Template Kubernetes/kubernetes.master.pod,5m)=1 or nodata(/Template Kubernetes/kubernetes.master.endpoint,5m)=1 or nodata(/Template Kubernetes/kubernetes.master.service,5m)=1",
+                "name": "Cluster is not reachable",
+                "priority": "HIGH",
+                "tags": [
+                    {
+                        "tag": "Application",
+                        "value": "Kubernetes"
+                    },
+                    {
+                        "tag": "Service",
+                        "value": "Availablity"
                     }
                 ]
             }
