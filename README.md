@@ -1,7 +1,6 @@
 # zabbix-kubernetes-template
 Zabbix kubernetes monitoring template
 
-
 Travail actuellement sur une template pour la supervision Kubernetes.
 
 ### Inspiré par :
@@ -12,3 +11,7 @@ Currently working on a Kubernetes monitoring template.
 
 ### Inspired by :
 > https://assets.zabbix.com/files/events/conference_china_2019/Shihong_Zhang-Zabbix_Monitor_k8s_Cluster.pdf
+
+# Deprecated 
+Zabbix provides a builtin templates to monitor Kubernetes cluster
+https://www.zabbix.com/integrations/kubernetes
